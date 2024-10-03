@@ -1,0 +1,20 @@
+{
+  "name": "podcast-api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway for podcasts microservice",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "start:mock-api": "json-server --watch mock-api/mock-data.json --port 5000"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.5.1"
+  },
+  "devDependencies": {
+    "json-server": "^0.16.3"
+  }
+}

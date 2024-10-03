@@ -1,0 +1,18 @@
+version: '1.0'
+services:
+  api-gateway:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - mock-api
+
+  mock-api:
+    image: json-server
+    volumes:
+      - ./mock-api/mock-data.json:/data.json
+    command: json-server --watch /data.json --port 5000
+    ports:
+      - "5000:5000"
