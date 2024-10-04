@@ -13,8 +13,19 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 app.use(rateLimiter);
 
+
 // API Routes
 app.use('/api/podcasts', podcastRoutes);
+
+
+// Heartbeat endpoint to check API health
+app.get('/heartbeat', (req, res) => {
+  res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+  });
+});
 
 // Error Handler
 app.use(errorHandler);

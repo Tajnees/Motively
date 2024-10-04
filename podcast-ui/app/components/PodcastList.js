@@ -10,28 +10,48 @@ const PodcastList = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState(''); // Debounced search state
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [totalPages, setTotalPages] = useState(0);
 
+    // Debounce effect: update debounced search after 500ms of inactivity
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search); // Set the debounced search value
+        }, 500); // 500ms debounce
+
+        // Cleanup timeout if the search term changes within the 500ms window
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [search]); // Run effect whenever the search value changes
+
+    // Fetch podcasts when debounced search, page, or limit changes
     useEffect(() => {
         fetchPodcasts();
-    }, [search, page, limit]);
+    }, [debouncedSearch, page, limit]);
 
     const fetchPodcasts = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/podcasts?search=${search}&page=${page}&limit=${limit}`);
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/podcasts?search=${debouncedSearch}&page=${page}&limit=${limit}`
+            );
+
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Failed to fetch podcasts');
             }
+
             const data = await response.json();
             console.log('Fetched podcasts:', data);
             setPodcasts(data.data);
 
-            // Fetch total podcasts for pagination
-            const totalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/podcasts?search=${search}`);
+            // Fetch total podcasts count for pagination
+            const totalResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/podcasts?search=${debouncedSearch}`
+            );
             const totalData = await totalResponse.json();
             setTotalPages(Math.ceil(totalData.data.length / limit));
         } catch (error) {
@@ -44,12 +64,12 @@ const PodcastList = () => {
 
     const handleSearchChange = (e) => {
         setSearch(e.target.value);
-        setPage(1);
+        setPage(1); // Reset page when search term changes
     };
 
     const handleLimitChange = (e) => {
         setLimit(parseInt(e.target.value, 10));
-        setPage(1);
+        setPage(1); // Reset page when limit changes
     };
 
     return (
